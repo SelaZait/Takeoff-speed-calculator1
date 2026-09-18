@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Takeoff Speed Calculator</title>
+    <style>
+        :root {
+            --primary-color: #007aff;
+            --background-color: #f2f2f7;
+            --card-background: #ffffff;
+            --text-color: #1c1c1e;
+            --subtext-color: #8e8e93;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background-color: var(--card-background);
+            padding: 28px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .wind-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .wind-group .input-wrapper {
+            flex: 2;
+        }
+
+        .wind-group .select-wrapper {
+            flex: 1;
+        }
+
+        .heading-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .heading-group .input-wrapper {
+            flex: 1;
+        }
+
+        .input-with-btn {
+            display: flex;
+            gap: 6px;
+        }
+
+        .input-with-btn input {
+            flex: 1;
+        }
+
+        .compass-btn {
+            width: 44px;
+            height: 48px;
+            padding: 0;
+            margin-top: 0;
+            background-color: #e5e5ea;
+            color: var(--primary-color);
+            font-size: 18px;
+            border: none;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .compass-btn:active {
+            background-color: #c7c7cc;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--subtext-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #c7c7cc;
+            border-radius: 12px;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+            background-color: #fff;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus, select:focus {
+            border-color: var(--primary-color);
+        }
+
+        .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8f8fc;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid #e5e5ea;
+            margin-bottom: 18px;
+        }
+
+        .toggle-wrapper label {
+            margin-bottom: 0;
+            cursor: pointer;
+            color: var(--text-color);
+            font-size: 14px;
+            text-transform: none;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #e5e5ea;
+            transition: .3s;
+            border-radius: 26px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        button.primary-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+
+        button.primary-btn:active {
+            background-color: #0056b3;
+        }
+
+        .ai-btn {
+            background-color: #e5e5ea;
+            color: #007aff;
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 15px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            border-radius: 12px;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .ai-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result-container {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e5ea;
+            text-align: center;
+        }
+
+        .result-label {
+            font-size: 13px;
+            color: var(--subtext-color);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .result-value {
+            font-size: 38px;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        .result-details {
+            font-size: 15px;
+            color: var(--subtext-color);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .preview-container {
+            text-align: center;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .preview-container img {
+            max-width: 100%;
+            max-height: 180px;
+            border-radius: 10px;
+            border: 1px solid #c7c7cc;
+        }
+
+        .wing-note {
+            width: 100%;
+            max-width: 420px;
+            margin-top: 14px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--subtext-color);
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Takeoff Calculator</h2>
+
+    <div class="input-group">
+        <label for="weight">Takeoff Weight (kg)</label>
+        <input type="number" id="weight" placeholder="e.g. 500" step="any" min="0">
+    </div>
+
+    <div class="input-group">
+        <label for="elevation">Site Elevation (m ASL)</label>
+        <div class="input-with-btn">
+            <input type="number" id="elevation" placeholder="e.g. 800" step="any" value="0">
+            <button type="button" class="compass-btn" onclick="captureElevation(event)" title="Capture Elevation from GPS">📍</button>
+        </div>
+    </div>
+
+    <!-- Toggle AI Engine -->
+    <div class="toggle-wrapper">
+        <label for="aiToggle">Enable AI Wind Estimation</label>
+        <label class="switch">
+            <input type="checkbox" id="aiToggle" onchange="toggleAIService(this.checked)">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <!-- Image Upload Area -->
+    <div class="input-group" id="aiSection" style="display: none;">
+        <input type="file" id="aiImageInput" accept="image/*" style="display: none;" onchange="analyzeWindsockAI(event)">
+        <button id="aiBtn" class="ai-btn" onclick="document.getElementById('aiImageInput').click()">
+            🖼️ Select Photo / Camera
+        </button>
+        <div class="preview-container" id="previewContainer">
+            <img id="imagePreview" alt="Windsock Preview">
+        </div>
+    </div>
+
+    <div class="input-group wind-group">
+        <div class="input-wrapper">
+            <label for="windSpeed">Wind Speed</label>
+            <input type="number" id="windSpeed" placeholder="0" step="any" min="0" value="0"
+                   oninput="this.value = clampPositive(this.value)">
+        </div>
+        <div class="select-wrapper">
+            <label for="windUnit">Unit</label>
+            <select id="windUnit">
+                <option value="kmh">km/h</option>
+                <option value="kts" selected>Knots</option>
+                <option value="ms">m/s</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Heading & Wind Dir Input Fields with Compass Buttons -->
+    <div class="input-group heading-group">
+        <div class="input-wrapper">
+            <label for="takeoffHeading">Takeoff Hdg (°)</label>
+            <div class="input-with-btn">
+                <input type="number" id="takeoffHeading" placeholder="0-360" min="0" max="360" value="0"
+                       oninput="this.value = clampAzimuth(this.value)">
+                <button type="button" class="compass-btn" onclick="captureCompass('takeoffHeading', event)" title="Capture Heading">🧭</button>
+            </div>
+        </div>
+        <div class="input-wrapper">
+            <label for="windDir">Wind Dir (°)</label>
+            <div class="input-with-btn">
+                <input type="number" id="windDir" placeholder="0-360" min="0" max="360" value="0"
+                       oninput="this.value = clampAzimuth(this.value)">
+                <button type="button" class="compass-btn" onclick="captureCompass('windDir', event)" title="Capture Wind Direction">🧭</button>
+            </div>
+        </div>
+    </div>
+
+    <button class="primary-btn" onclick="calculateSpeed()">Calculate</button>
+
+    <div class="result-container" id="resultContainer" style="display: none;">
+        <div class="result-label">Ground Speed</div>
+        <div class="result-value" id="groundspeedResult">0 km/h</div>
+
+        <div class="result-details" id="headwindResult">Headwind Component: 0 km/h</div>
+        <div class="result-details" id="airspeedResult">Airspeed (TAS): 0 km/h | 0 m/s</div>
+    </div>
+</div>
+
+<div class="wing-note">This calculator is calibrated for the APCO Cruiser S 550 paraglider wing.</div>
+
+<script>
+    /* =========================================================
+       INPUT VALIDATION
+       Keeps azimuth fields inside 0-360 and wind speed non-negative.
+       ========================================================= */
+
+    function clampAzimuth(value) {
+        if (value === '' || value === null) return value;
+        let num = parseFloat(value);
+        if (isNaN(num)) return '';
+        if (num < 0) num = 0;
+        if (num > 360) num = 360;
+        return num;
+    }
+
+    function clampPositive(value) {
+        if (value === '' || value === null) return value;
+        let num = parseFloat(value);
+        if (isNaN(num)) return '';
+        if (num < 0) num = 0;
+        return num;
+    }
+
+    /* =========================================================
+       COMPASS / DEVICE ORIENTATION
+       Reads the phone's heading sensor for iOS and Android.
+       Only works while the phone is held upright (portrait) —
+       the sensor's compass heading is relative to the top edge
+       of the screen, so it is unreliable in landscape.
+       ========================================================= */
+
+    function isPortraitOrientation() {
+        if (screen.orientation && screen.orientation.type) {
+            return screen.orientation.type.startsWith('portrait');
+        }
+        if (typeof window.orientation !== 'undefined') {
+            return window.orientation === 0 || window.orientation === 180;
+        }
+        // Orientation API unavailable: assume portrait rather than block the user.
+        return true;
+    }
+
+    async function captureCompass(targetInputId, evt) {
+        const btn = evt.currentTarget;
+        const originalText = btn.innerText;
+
+        if (!isPortraitOrientation()) {
+            alert("Please hold the phone upright (portrait mode) to use the compass. It does not read correctly in landscape.");
+            return;
+        }
+
+        btn.innerText = "⏳";
+
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            try {
+                const response = await DeviceOrientationEvent.requestPermission();
+                if (response === 'granted') {
+                    listenToOrientation(targetInputId, btn, originalText);
+                } else {
+                    alert("Compass permission was denied.");
+                    btn.innerText = originalText;
+                }
+            } catch (error) {
+                alert("HTTPS connection is required to use the compass sensor.");
+                btn.innerText = originalText;
+            }
+        }
+        else if ('ondeviceorientationabsolute' in window || 'ondeviceorientation' in window) {
+            listenToOrientation(targetInputId, btn, originalText);
+        }
+        else {
+            alert("Compass orientation sensor is not supported on this device/browser.");
+            btn.innerText = originalText;
+        }
+    }
+
+    function listenToOrientation(targetInputId, btn, originalText) {
+        let captured = false;
+
+        function handleEvent(event) {
+            if (captured) return;
+
+            if (!isPortraitOrientation()) return; // ignore stray readings if rotated mid-capture
+
+            let heading = null;
+
+            if (event.webkitCompassHeading !== undefined && event.webkitCompassHeading !== null) {
+                heading = event.webkitCompassHeading;
+            }
+            else if (event.alpha !== undefined && event.alpha !== null) {
+                heading = (360 - event.alpha) % 360;
+            }
+
+            if (heading !== null && !isNaN(heading)) {
+                captured = true;
+                const normalizedHeading = Math.round((heading + 360) % 360);
+                document.getElementById(targetInputId).value = normalizedHeading;
+
+                cleanListeners(handleEvent);
+
+                btn.innerText = "✅";
+                setTimeout(() => { btn.innerText = originalText; }, 1200);
+            }
+        }
+
+        if ('ondeviceorientationabsolute' in window) {
+            window.addEventListener('deviceorientationabsolute', handleEvent, true);
+        }
+        window.addEventListener('deviceorientation', handleEvent, true);
+
+        setTimeout(() => {
+            if (!captured) {
+                cleanListeners(handleEvent);
+                btn.innerText = originalText;
+                alert("No compass signal detected. Make sure motion sensors are enabled and the phone is held upright.");
+            }
+        }, 3000);
+    }
+
+    function cleanListeners(handler) {
+        window.removeEventListener('deviceorientationabsolute', handler, true);
+        window.removeEventListener('deviceorientation', handler, true);
+    }
+
+    /* =========================================================
+       GPS ELEVATION
+       Reads altitude above sea level from the phone's location
+       sensor (GPS/GNSS). Altitude fixes are less accurate than
+       lat/lng and are not available on every device — treat the
+       result as an estimate and correct it against a known site
+       elevation when possible.
+       ========================================================= */
+
+    function captureElevation(evt) {
+        const btn = evt.currentTarget;
+        const originalText = btn.innerText;
+
+        if (!('geolocation' in navigator)) {
+            alert("Geolocation is not supported on this device/browser.");
+            return;
+        }
+
+        btn.innerText = "⏳";
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const altitude = position.coords.altitude;
+                const accuracy = position.coords.altitudeAccuracy;
+
+                if (altitude === null || altitude === undefined) {
+                    alert("This device did not return an altitude reading. Please enter the elevation manually.");
+                    btn.innerText = originalText;
+                    return;
+                }
+
+                document.getElementById('elevation').value = Math.round(altitude);
+
+                btn.innerText = "✅";
+                setTimeout(() => { btn.innerText = originalText; }, 1200);
+
+                if (accuracy && accuracy > 30) {
+                    alert(`Altitude captured, but the GPS fix is only accurate to about ±${Math.round(accuracy)} m. Double-check against a known site elevation if possible.`);
+                }
+            },
+            (error) => {
+                if (error.code === error.PERMISSION_DENIED) {
+                    alert("Location permission was denied.");
+                } else {
+                    alert("Could not get a GPS fix. Move to an open area and try again.");
+                }
+                btn.innerText = originalText;
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    }
+
+    /* =========================================================
+       TAKEOFF SPEED CALCULATION
+       Airspeed formula is calibrated for the APCO Cruiser S 550
+       (see note at the bottom of the page).
+       ========================================================= */
+
+    // ISA troposphere approximation for air density ratio vs. sea level
+    // (valid roughly -500 m to 11,000 m). sigma = rho / rho0.
+    function airDensityRatio(altitudeM) {
+        const sigma = Math.pow(1 - 2.25577e-5 * altitudeM, 4.2559);
+        return Math.max(0.01, sigma); // guard against extreme/invalid input
+    }
+
+    function calculateSpeed() {
+        const weightInput = document.getElementById('weight').value;
+        const weight = parseFloat(weightInput);
+        const elevationInput = parseFloat(document.getElementById('elevation').value);
+        const elevation = isNaN(elevationInput) ? 0 : elevationInput;
+        const windSpeedInput = parseFloat(document.getElementById('windSpeed').value) || 0;
+        const windUnit = document.getElementById('windUnit').value;
+
+        const windDir = parseFloat(document.getElementById('windDir').value) || 0;
+        const takeoffHeading = parseFloat(document.getElementById('takeoffHeading').value) || 0;
+
+        if (isNaN(weight) || weight <= 0) {
+            alert("Please enter a valid weight in kg.");
+            return;
+        }
+
+        if (windSpeedInput < 0) {
+            alert("Wind speed cannot be negative.");
+            return;
+        }
+
+        let windKmh = windSpeedInput;
+        if (windUnit === 'kts') {
+            windKmh = windSpeedInput * 1.852;
+        } else if (windUnit === 'ms') {
+            windKmh = windSpeedInput * 3.6;
+        }
+
+        const angleDiffRad = (windDir - takeoffHeading) * (Math.PI / 180);
+        const headwindKmh = windKmh * Math.cos(angleDiffRad);
+
+        // Calibration constant for the APCO Cruiser S 550 wing (sea-level airspeed).
+        const K_mid = 70.1 / Math.sqrt(490);
+        const airspeedKmhSeaLevel = K_mid * Math.sqrt(weight);
+
+        // Lift needed is fixed by weight, and Lift ∝ air density × V².
+        // At lower density (higher elevation), the true airspeed needed
+        // to generate the same lift is higher: V ∝ 1/√(density ratio).
+        const sigma = airDensityRatio(elevation);
+        const airspeedKmh = airspeedKmhSeaLevel / Math.sqrt(sigma);
+        const airspeedMs = airspeedKmh / 3.6;
+
+        const groundSpeedKmh = Math.max(0, airspeedKmh - headwindKmh);
+
+        document.getElementById('groundspeedResult').innerText = groundSpeedKmh.toFixed(1) + ' km/h';
+        document.getElementById('headwindResult').innerText = `Headwind Component: ${headwindKmh.toFixed(1)} km/h`;
+        document.getElementById('airspeedResult').innerText = `Airspeed (TAS) @ ${elevation.toFixed(0)} m ASL: ${airspeedKmh.toFixed(1)} km/h | ${airspeedMs.toFixed(1)} m/s`;
+
+        document.getElementById('resultContainer').style.display = 'block';
+    }
+
+    function toggleAIService(enabled) {
+        const aiSection = document.getElementById('aiSection');
+        aiSection.style.display = enabled ? 'block' : 'none';
+
+        if (enabled && window.loadAIModel) {
+            window.loadAIModel();
+        }
+    }
+</script>
+
+<!-- =========================================================
+     AI WINDSOCK DETECTION
+     Loads an object-detection model, finds the windsock in the
+     photo, measures its angle relative to the horizon, and
+     converts that angle to an estimated wind speed.
+     ========================================================= -->
+<script type="module">
+    let detector = null;
+    let isAiLoading = false;
+
+    // Approximate calibration for the angle-to-speed conversion:
+    // a sock lying flat (0° from horizon) is treated as fully
+    // extended wind; a sock hanging straight down (90° from
+    // horizon) is treated as no wind. This is a rough linear
+    // estimate, not a measured curve for a specific sock.
+    const FULL_EXTENSION_KT = 15;
+
+    window.loadAIModel = async function() {
+        const btn = document.getElementById('aiBtn');
+        if (detector || isAiLoading) return;
+
+        isAiLoading = true;
+        btn.innerText = "⏳ Loading AI Engine...";
+
+        try {
+            const { pipeline, env } = await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0');
+            env.allowLocalModels = false;
+            detector = await pipeline('object-detection', 'Xenova/detr-resnet-50');
+            btn.innerText = "🖼️ Select Photo / Camera (AI Ready)";
+        } catch (e) {
+            detector = null;
+            btn.innerText = "⚠️ AI engine failed to load — enter speed manually";
+        } finally {
+            isAiLoading = false;
+        }
+    };
+
+    window.analyzeWindsockAI = async function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const btn = document.getElementById('aiBtn');
+        const imgElement = document.getElementById('imagePreview');
+        const previewContainer = document.getElementById('previewContainer');
+
+        const imageUrl = URL.createObjectURL(file);
+        imgElement.src = imageUrl;
+        previewContainer.style.display = 'block';
+
+        if (!detector) {
+            btn.innerText = "⚠️ AI engine not ready — enter speed manually";
+            return;
+        }
+
+        btn.innerText = "🔄 Analyzing Image...";
+        btn.disabled = true;
+
+        imgElement.onload = async () => {
+            try {
+                const output = await detector(imageUrl);
+
+                if (!output || output.length === 0) {
+                    btn.innerText = "⚠️ No windsock detected — enter speed manually";
+                    return;
+                }
+
+                const box = output[0].box;
+                const width = box.xmax - box.xmin;
+                const height = box.ymax - box.ymin;
+
+                // Angle of the sock relative to the horizon: a sock lying
+                // flat is wide & short (angle -> 0°); a sock hanging
+                // straight down is narrow & tall (angle -> 90°).
+                const angleFromHorizonDeg = Math.min(90, Math.max(0,
+                    Math.atan2(height, width) * (180 / Math.PI)
+                ));
+
+                const estimatedKnots = FULL_EXTENSION_KT * (1 - angleFromHorizonDeg / 90);
+
+                document.getElementById('windSpeed').value = estimatedKnots.toFixed(1);
+                document.getElementById('windUnit').value = 'kts';
+                btn.innerText = `✅ Sock ${angleFromHorizonDeg.toFixed(0)}° from horizon → ~${estimatedKnots.toFixed(1)} kt`;
+            } catch (err) {
+                btn.innerText = "⚠️ Analysis failed — enter speed manually";
+            } finally {
+                btn.disabled = false;
+            }
+        };
+    };
+</script>
+
+</body>
+</html>
