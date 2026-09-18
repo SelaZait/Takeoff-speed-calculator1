@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Takeoff Speed Calculator</title>
+    <style>
+        :root {
+            --primary-color: #007aff;
+            --background-color: #f2f2f7;
+            --card-background: #ffffff;
+            --text-color: #1c1c1e;
+            --subtext-color: #8e8e93;
+            --danger-color: #ff3b30;
+            --warning-color: #ff9500;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background-color: var(--card-background);
+            padding: 28px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 440px;
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .wind-group, .heading-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .wind-group .input-wrapper { flex: 2; }
+        .wind-group .select-wrapper { flex: 1; }
+        .heading-group .input-wrapper { flex: 1; }
+
+        .input-with-btn {
+            display: flex;
+            gap: 6px;
+        }
+
+        .input-with-btn input {
+            flex: 1;
+        }
+
+        .compass-btn {
+            width: 44px;
+            height: 48px;
+            padding: 0;
+            margin-top: 0;
+            background-color: #e5e5ea;
+            color: var(--primary-color);
+            font-size: 18px;
+            border: none;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .compass-btn:active {
+            background-color: #c7c7cc;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--subtext-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #c7c7cc;
+            border-radius: 12px;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+            background-color: #fff;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus, select:focus {
+            border-color: var(--primary-color);
+        }
+
+        .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8f8fc;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid #e5e5ea;
+            margin-bottom: 18px;
+        }
+
+        .toggle-wrapper label {
+            margin-bottom: 0;
+            cursor: pointer;
+            color: var(--text-color);
+            font-size: 14px;
+            text-transform: none;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 26px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #e5e5ea;
+            transition: .3s;
+            border-radius: 26px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            right: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: var(--primary-color); }
+        input:checked + .slider:before { transform: translateX(-20px); }
+
+        button.primary-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+
+        button.primary-btn:active { background-color: #0056b3; }
+
+        .ai-btn {
+            background-color: #e5e5ea;
+            color: #007aff;
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 15px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            border-radius: 12px;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .canvas-container {
+            position: relative;
+            text-align: center;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        canvas {
+            max-width: 100%;
+            border-radius: 10px;
+            border: 1px solid #c7c7cc;
+            touch-action: none;
+            cursor: crosshair;
+        }
+
+        .canvas-hint {
+            font-size: 12px;
+            color: var(--subtext-color);
+            margin-top: 4px;
+        }
+
+        .result-container {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e5ea;
+            text-align: center;
+        }
+
+        .result-label {
+            font-size: 13px;
+            color: var(--subtext-color);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .result-value {
+            font-size: 38px;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        .result-details {
+            font-size: 15px;
+            color: var(--subtext-color);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .warning-box {
+            margin-top: 14px;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            display: none;
+            text-align: center;
+        }
+
+        .warning-box.danger {
+            background-color: #ffe5e5;
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+
+        .warning-box.warning {
+            background-color: #fff3e0;
+            color: var(--warning-color);
+            border: 1px solid var(--warning-color);
+        }
+
+        .wing-note {
+            width: 100%;
+            max-width: 440px;
+            margin-top: 14px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--subtext-color);
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>מחשבון המראה (Takeoff)</h2>
+
+    <div class="input-group">
+        <label for="weight">משקל המראה כולל (kg) - מספר שלם</label>
+        <input type="number" id="weight" placeholder="לדוגמה: 500" step="1" min="1" oninput="validateIntegerWeight(this)">
+    </div>
+
+    <div class="input-group">
+        <label for="elevation">גובה האתר (מטרים מעל פני הים)</label>
+        <div class="input-with-btn">
+            <input type="number" id="elevation" placeholder="לדוגמה: 800" step="any" value="0">
+            <button type="button" class="compass-btn" onclick="captureElevation(event)" title="לכידת גובה מ-GPS">📍</button>
+        </div>
+    </div>
+
+    <!-- Toggle AI Engine -->
+    <div class="toggle-wrapper">
+        <label for="aiToggle">הפעל מדידת שק רוח מצולם</label>
+        <label class="switch">
+            <input type="checkbox" id="aiToggle" onchange="toggleAIService(this.checked)">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <!-- Image Upload & Interactive Canvas Area -->
+    <div class="input-group" id="aiSection" style="display: none;">
+        <input type="file" id="aiImageInput" accept="image/*" style="display: none;" onchange="handleWindsockImage(event)">
+        <button id="aiBtn" class="ai-btn" onclick="document.getElementById('aiImageInput').click()">
+            🖼️ בחר תמונה / צלם שק רוח
+        </button>
+        <div class="canvas-container" id="canvasContainer">
+            <canvas id="windsockCanvas"></canvas>
+            <div class="canvas-hint">סמן בקו מחלקו התחתון/הבסיס של השק ועד קצהו</div>
+        </div>
+    </div>
+
+    <div class="input-group wind-group">
+        <div class="input-wrapper">
+            <label for="windSpeed">מהירות רוח</label>
+            <input type="number" id="windSpeed" placeholder="0" step="any" min="0" value="0" oninput="this.value = clampPositive(this.value)">
+        </div>
+        <div class="select-wrapper">
+            <label for="windUnit">יחידה</label>
+            <select id="windUnit">
+                <option value="kts" selected>קשר (kts)</option>
+                <option value="kmh">קמ"ש</option>
+                <option value="ms">מ'/שנייה</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Heading & Wind Dir Input Fields -->
+    <div class="heading-group input-group">
+        <div class="input-wrapper">
+            <label for="takeoffHeading">כיוון המראה (°)</label>
+            <div class="input-with-btn">
+                <input type="number" id="takeoffHeading" placeholder="0-360" min="0" max="360" value="0" oninput="this.value = clampAzimuth(this.value)">
+                <button type="button" class="compass-btn" onclick="captureCompass('takeoffHeading', event)" title="דגום מצפן">🧭</button>
+            </div>
+        </div>
+        <div class="input-wrapper">
+            <label for="windDir">כיוון רוח (°)</label>
+            <div class="input-with-btn">
+                <input type="number" id="windDir" placeholder="0-360" min="0" max="360" value="0" oninput="this.value = clampAzimuth(this.value)">
+                <button type="button" class="compass-btn" onclick="captureCompass('windDir', event)" title="דגום מצפן">🧭</button>
+            </div>
+        </div>
+    </div>
+
+    <button class="primary-btn" onclick="calculateSpeed()">חשב מהירות</button>
+
+    <!-- התראות בטיחות -->
+    <div class="warning-box" id="warningBox"></div>
+
+    <div class="result-container" id="resultContainer" style="display: none;">
+        <div class="result-label">מהירות קרקע דרושה (Ground Speed)</div>
+        <div class="result-value" id="groundspeedResult">0 km/h</div>
+
+        <div class="result-details" id="headwindResult">רכיב רוח פנים: 0 km/h</div>
+        <div class="result-details" id="crosswindResult">רכיב רוח צד: 0 kts</div>
+        <div class="result-details" id="airspeedResult">מהירות אוויר (TAS): 0 km/h</div>
+    </div>
+</div>
+
+<div class="wing-note">המחשבון מותאם ומכויל עבור כנף APCO Cruiser S 550.</div>
+
+<script>
+    let currentImageUrl = null;
+
+    /* =========================================================
+       1. בדיקת תקינות קלט - משקל שלם בלבד
+       ========================================================= */
+    function validateIntegerWeight(input) {
+        let val = input.value;
+        if (val === '') return;
+        let num = parseInt(val, 10);
+        if (isNaN(num) || num <= 0) {
+            input.value = '';
+        } else {
+            input.value = num; // מבטיח שמדובר במספר שלם בלבד
+        }
+    }
+
+    function clampAzimuth(value) {
+        if (value === '' || value === null) return value;
+        let num = parseFloat(value);
+        if (isNaN(num)) return '';
+        if (num < 0) num = 0;
+        if (num > 360) num = 360;
+        return num;
+    }
+
+    function clampPositive(value) {
+        if (value === '' || value === null) return value;
+        let num = parseFloat(value);
+        if (isNaN(num)) return '';
+        if (num < 0) num = 0;
+        return num;
+    }
+
+    /* =========================================================
+       4. מצפן מתוקן - תמיכה ב-iOS/Android, אופקי ואנכי
+       ========================================================= */
+    function getScreenOrientationAngle() {
+        if (screen.orientation && screen.orientation.angle !== undefined) {
+            return screen.orientation.angle;
+        }
+        if (typeof window.orientation !== 'undefined') {
+            return window.orientation;
+        }
+        return 0;
+    }
+
+    async function captureCompass(targetInputId, evt) {
+        const btn = evt.currentTarget;
+        const originalText = btn.innerText;
+        btn.innerText = "⏳";
+
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            try {
+                const response = await DeviceOrientationEvent.requestPermission();
+                if (response === 'granted') {
+                    listenToOrientation(targetInputId, btn, originalText);
+                } else {
+                    alert("הרשאה למצפן נדחתה.");
+                    btn.innerText = originalText;
+                }
+            } catch (error) {
+                alert("נדרש חיבור מאובטח (HTTPS) לעבודה עם חיישן המצפן.");
+                btn.innerText = originalText;
+            }
+        } else if ('ondeviceorientationabsolute' in window || 'ondeviceorientation' in window) {
+            listenToOrientation(targetInputId, btn, originalText);
+        } else {
+            alert("חיישן מצפן אינו נתמך במכשיר/בדפדפן זה.");
+            btn.innerText = originalText;
+        }
+    }
+
+    function listenToOrientation(targetInputId, btn, originalText) {
+        let captured = false;
+
+        function handleEvent(event) {
+            if (captured) return;
+
+            let heading = null;
+
+            // iOS / Webkit Heading
+            if (event.webkitCompassHeading !== undefined && event.webkitCompassHeading !== null) {
+                heading = event.webkitCompassHeading;
+            } 
+            // Android Absolute Orientation
+            else if (event.alpha !== undefined && event.alpha !== null) {
+                if (event.absolute || event.type === 'deviceorientationabsolute') {
+                    heading = (360 - event.alpha) % 360;
+                }
+            }
+
+            if (heading !== null && !isNaN(heading)) {
+                captured = true;
+                
+                // תיקון זווית לפי סיבוב המסך (Portrait/Landscape)
+                const screenAngle = getScreenOrientationAngle();
+                let finalHeading = (heading + screenAngle) % 360;
+                if (finalHeading < 0) finalHeading += 360;
+
+                const normalizedHeading = Math.round(finalHeading);
+                document.getElementById(targetInputId).value = normalizedHeading;
+
+                cleanListeners(handleEvent);
+                btn.innerText = "✅";
+                setTimeout(() => { btn.innerText = originalText; }, 1200);
+            }
+        }
+
+        if ('ondeviceorientationabsolute' in window) {
+            window.addEventListener('deviceorientationabsolute', handleEvent, true);
+        }
+        window.addEventListener('deviceorientation', handleEvent, true);
+
+        setTimeout(() => {
+            if (!captured) {
+                cleanListeners(handleEvent);
+                btn.innerText = originalText;
+                alert("לא התקבל אות מצפן תקין. ודא שחיישני התנועה מופעלים.");
+            }
+        }, 3000);
+    }
+
+    function cleanListeners(handler) {
+        window.removeEventListener('deviceorientationabsolute', handler, true);
+        window.removeEventListener('deviceorientation', handler, true);
+    }
+
+    /* =========================================================
+       GPS ELEVATION
+       ========================================================= */
+    function captureElevation(evt) {
+        const btn = evt.currentTarget;
+        const originalText = btn.innerText;
+
+        if (!('geolocation' in navigator)) {
+            alert("רכיב GPS אינו נתמך בדפדפן זה.");
+            return;
+        }
+
+        btn.innerText = "⏳";
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const altitude = position.coords.altitude;
+                if (altitude === null || altitude === undefined) {
+                    alert("המכשיר לא החזיר נתוני גובה. נא להזין גובה ידנית.");
+                    btn.innerText = originalText;
+                    return;
+                }
+                document.getElementById('elevation').value = Math.round(altitude);
+                btn.innerText = "✅";
+                setTimeout(() => { btn.innerText = originalText; }, 1200);
+            },
+            () => {
+                alert("לא ניתן היה לקבל מיקום GPS.");
+                btn.innerText = originalText;
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    }
+
+    /* =========================================================
+       חישוב מהירות המראה + בדיקת אזהרות בטיחות
+       ========================================================= */
+    function airDensityRatio(altitudeM) {
+        const sigma = Math.pow(1 - 2.25577e-5 * altitudeM, 4.2559);
+        return Math.max(0.01, sigma);
+    }
+
+    function calculateSpeed() {
+        const weightInput = document.getElementById('weight').value;
+        const weight = parseInt(weightInput, 10);
+        
+        if (isNaN(weight) || weight <= 0 || !Number.isInteger(weight)) {
+            alert("נא להזין משקל המראה תקין במספר שלם (kg).");
+            return;
+        }
+
+        const elevationInput = parseFloat(document.getElementById('elevation').value);
+        const elevation = isNaN(elevationInput) ? 0 : elevationInput;
+        const windSpeedInput = parseFloat(document.getElementById('windSpeed').value) || 0;
+        const windUnit = document.getElementById('windUnit').value;
+
+        const windDir = parseFloat(document.getElementById('windDir').value) || 0;
+        const takeoffHeading = parseFloat(document.getElementById('takeoffHeading').value) || 0;
+
+        let windKkts = windSpeedInput;
+        if (windUnit === 'kmh') windKkts = windSpeedInput / 1.852;
+        else if (windUnit === 'ms') windKkts = windSpeedInput * 1.94384;
+
+        const windKmh = windKkts * 1.852;
+
+        const angleDiffRad = (windDir - takeoffHeading) * (Math.PI / 180);
+        
+        // חישוב רכיבי רוח
+        const headwindKmh = windKmh * Math.cos(angleDiffRad);
+        const crosswindKkts = Math.abs(windKkts * Math.sin(angleDiffRad));
+
+        // כיול עבור APCO Cruiser S 550
+        const K_mid = 70.1 / Math.sqrt(490);
+        const airspeedKmhSeaLevel = K_mid * Math.sqrt(weight);
+
+        const sigma = airDensityRatio(elevation);
+        const airspeedKmh = airspeedKmhSeaLevel / Math.sqrt(sigma);
+        const airspeedMs = airspeedKmh / 3.6;
+
+        const groundSpeedKmh = Math.max(0, airspeedKmh - headwindKmh);
+
+        document.getElementById('groundspeedResult').innerText = groundSpeedKmh.toFixed(1) + ' km/h';
+        document.getElementById('headwindResult').innerText = `רכיב רוח פנים: ${headwindKmh.toFixed(1)} km/h`;
+        document.getElementById('crosswindResult').innerText = `רכיב רוח צד: ${crosswindKkts.toFixed(1)} kts`;
+        document.getElementById('airspeedResult').innerText = `מהירות אוויר (TAS): ${airspeedKmh.toFixed(1)} km/h | ${airspeedMs.toFixed(1)} m/s`;
+
+        // אזהרות בטיחות
+        const warningBox = document.getElementById('warningBox');
+        warningBox.style.display = 'none';
+        warningBox.c
