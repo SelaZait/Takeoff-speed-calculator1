@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Takeoff Speed Calculator | Apco Cruiser S 550</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#09517e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between font-sans antialiased text-slate-900 pb-6">
+
+    <!-- Minimal Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-md mx-auto px-4 py-3.5 flex justify-between items-center">
+            <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-plane-departure text-base"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold tracking-tight text-slate-900 leading-none">Takeoff Calculator</h1>
+                    <p class="text-[11px] text-slate-500 font-medium">Flight Planning Assistant</p>
+                </div>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-100">
+                Apco Cruiser S 550
+            </span>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto w-full px-4 pt-4 space-y-3.5 flex-grow">
+
+        <!-- UNIT SELECTOR BAR -->
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-2.5 shadow-sm flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-600 ml-1 flex items-center">
+                <i class="fa-solid fa-sliders text-sky-600 mr-2"></i> Speed Units:
+            </span>
+            <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200/60" id="unitSelector">
+                <button type="button" data-unit="kmh" class="unit-btn text-xs font-semibold px-3 py-1.5 rounded-lg transition bg-white text-sky-700 shadow-sm">
+                    km/h
+                </button>
+                <button type="button" data-unit="ms" class="unit-btn text-xs font-semibold px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">
+                    m/s
+                </button>
+                <button type="button" data-unit="kt" class="unit-btn text-xs font-semibold px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900">
+                    kt
+                </button>
+            </div>
+        </div>
+
+        <!-- WARNING ALERTS CONTAINER -->
+        <div id="warningsContainer" class="space-y-2 hidden">
+            <!-- Dynamic Tailwind/Crosswind alerts -->
+        </div>
+
+        <!-- PRIMARY RESULT DISPLAY CARD -->
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm space-y-3.5">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Takeoff Speed Results</span>
+                <span id="speedStatusBadge" class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+                    Optimal Conditions
+                </span>
+            </div>
+
+            <!-- Primary Speed Metrics -->
+            <div class="grid grid-cols-2 gap-3 pt-0.5">
+                <div class="space-y-1">
+                    <span class="text-xs font-medium text-slate-500 flex items-center">
+                        True Airspeed (TAS)
+                    </span>
+                    <div class="flex items-baseline space-x-1">
+                        <span id="resAirspeed" class="text-3xl font-bold text-slate-900">70.1</span>
+                        <span class="unit-label text-xs font-semibold text-slate-500">km/h</span>
+                    </div>
+                    <span class="text-[11px] text-slate-400 block">IAS: <span id="resIas" class="font-semibold text-slate-600">70.1</span> <span class="unit-label">km/h</span></span>
+                </div>
+
+                <div class="space-y-1 border-l border-slate-100 pl-3.5">
+                    <span class="text-xs font-medium text-slate-500">Ground Speed</span>
+                    <div class="flex items-baseline space-x-1">
+                        <span id="resGroundSpeed" class="text-3xl font-bold text-sky-600">70.1</span>
+                        <span class="unit-label text-xs font-semibold text-slate-500">km/h</span>
+                    </div>
+                    <span class="text-[11px] text-slate-400 block">Density Alt: <span id="resDensityAlt" class="font-semibold text-slate-600">0</span> m</span>
+                </div>
+            </div>
+
+            <!-- Wind Breakdown Summary -->
+            <div class="pt-2.5 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
+                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex justify-between items-center">
+                    <span class="text-slate-500 font-medium">Headwind:</span>
+                    <span id="resHeadwind" class="font-bold text-slate-800">0.0 km/h</span>
+                </div>
+                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex justify-between items-center">
+                    <span class="text-slate-500 font-medium">Crosswind:</span>
+                    <span id="resCrosswind" class="font-bold text-slate-800">0.0 km/h</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORM INPUT CONTROLS -->
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm space-y-3.5">
+
+            <!-- 1. TAKEOFF WEIGHT INPUT -->
+            <div class="space-y-1">
+                <div class="flex justify-between items-center">
+                    <label for="weightInput" class="text-xs font-semibold text-slate-700 flex items-center">
+                        <i class="fa-solid fa-weight-scale text-sky-600 mr-1.5"></i> Takeoff Weight
+                    </label>
+                    <span class="text-[11px] text-slate-400">490 kg @ 20°C MSL → 70.1 km/h</span>
+                </div>
+                <div class="relative">
+                    <input type="number" id="weightInput" value="490" min="200" max="1000" step="1"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-base font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
+                           placeholder="490">
+                    <div class="absolute right-3.5 top-2.5 text-xs font-semibold text-slate-400">kg</div>
+                </div>
+                <p id="weightError" class="text-rose-500 text-xs mt-1 hidden"></p>
+            </div>
+
+            <!-- 2. AMBIENT TEMPERATURE INPUT -->
+            <div class="space-y-1">
+                <div class="flex justify-between items-center">
+                    <label for="tempInput" class="text-xs font-semibold text-slate-700 flex items-center">
+                        <i class="fa-solid fa-temperature-half text-sky-600 mr-1.5"></i> Ambient Temperature
+                    </label>
+                    <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200/60" id="tempUnitSelector">
+                        <button type="button" data-tempunit="c" class="temp-unit-btn text-[10px] font-bold px-2 py-0.5 rounded transition bg-white text-sky-700 shadow-xs">°C</button>
+                        <button type="button" data-tempunit="f" class="temp-unit-btn text-[10px] font-bold px-2 py-0.5 rounded transition text-slate-500 hover:text-slate-800">°F</button>
+                    </div>
+                </div>
+                <div class="relative">
+                    <input type="number" id="tempInput" value="20" min="-20" max="60" step="1"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-base font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
+                           placeholder="20">
+                    <div class="temp-unit-label absolute right-3.5 top-2.5 text-xs font-semibold text-slate-400">°C</div>
+                </div>
+                <p id="tempError" class="text-rose-500 text-xs mt-1 hidden"></p>
+            </div>
+
+            <!-- 3. AIRFIELD ELEVATION INPUT -->
+            <div class="space-y-1">
+                <div class="flex justify-between items-center">
+                    <label for="altitudeInput" class="text-xs font-semibold text-slate-700 flex items-center">
+                        <i class="fa-solid fa-mountain text-sky-600 mr-1.5"></i> Airfield Elevation
+                    </label>
+                    <span class="text-[11px] text-slate-400">MSL Elevation</span>
+                </div>
+                <div class="flex space-x-2">
+                    <div class="relative flex-1">
+                        <input type="number" id="altitudeInput" value="0" min="0" max="5000" step="10"
+                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-base font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
+                               placeholder="0">
+                        <div class="absolute right-3.5 top-2.5 text-xs font-semibold text-slate-400">m</div>
+                    </div>
+                    <button type="button" id="btnGetAltitude" 
+                            class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-semibold text-xs px-3.5 py-2 rounded-xl border border-slate-200 flex items-center space-x-1.5 transition">
+                        <i class="fa-solid fa-location-crosshairs text-sky-600"></i>
+                        <span>GPS</span>
+                    </button>
+                </div>
+                <p id="altitudeError" class="text-rose-500 text-xs mt-1 hidden"></p>
+            </div>
+
+            <!-- 4. WIND SPEED INPUT -->
+            <div class="space-y-1">
+                <div class="flex justify-between items-center">
+                    <label for="windSpeedInput" class="text-xs font-semibold text-slate-700 flex items-center">
+                        <i class="fa-solid fa-wind text-sky-600 mr-1.5"></i> Wind Speed
+                    </label>
+                    <span class="text-[11px] text-slate-400" id="windSpeedLimitLabel">Max 50 km/h</span>
+                </div>
+                <div class="relative">
+                    <input type="number" id="windSpeedInput" value="0" min="0" max="50" step="0.1"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-base font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
+                           placeholder="0">
+                    <div class="unit-label absolute right-3.5 top-2.5 text-xs font-semibold text-slate-400">km/h</div>
+                </div>
+                <p id="windSpeedError" class="text-rose-500 text-xs mt-1 hidden"></p>
+            </div>
+
+            <!-- 5. WIND DIRECTION INPUT WITH COMPASS -->
+            <div class="space-y-1">
+                <div class="flex justify-between items-center">
+                    <label for="windDirInput" class="text-xs font-semibold text-slate-700 flex items-center">
+                        <i class="fa-solid fa-compass text-sky-600 mr-1.5"></i> Wind Direction
+                    </label>
+                    <span class="text-[11px] text-slate-400">0° - 360°</span>
+                </div>
+                <div class="flex space-x-2">
+                    <div class="relative flex-1">
+                        <input type="number" id="windDirInput" value="0" min="0" max="360" step="1"
+                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-base font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
+                               placeholder="0">
+                        <div class="absolute right-3.5 top-2.5 text-xs font-semibold text-slate-400">deg</div>
+                    </div>
+                    <button type="button" id="btnWindCompass" 
+                            class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-semibold text-xs px-3.5 py-2 rounded-xl border border-slate-200 flex items-center space-x-1.5 transition">
+                        <i class="fa-solid fa-regular fa-compass text-sky-600"></i>
+                        <span>Compass</span>
+                    </button>
+                </div>
+                <p id="windDirError" class="text-rose-500 text-xs mt-1 hidden"></p>
+            </div>
+
+            <!-- 6. TAKEOFF HEADING INPUT WITH COMPASS -->
+            <div class="space-y-1">
+                <div class="flex justify-between items-center">
+                    <label for="takeoffHeadingInput" class="text-xs font-semibold text-slate-700 flex items-center">
+                        <i class="fa-solid fa-location-arrow text-sky-600 mr-1.5"></i> Takeoff Heading
+                    </label>
+                    <span class="text-[11px] text-slate-400">Runway Direction</span>
+                </div>
+                <div class="flex space-x-2">
+                    <div class="relative flex-1">
+                        <input type="number" id="takeoffHeadingInput" value="0" min="0" max="360" step="1"
+                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-base font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
+                               placeholder="0">
+                        <div class="absolute right-3.5 top-2.5 text-xs font-semibold text-slate-400">deg</div>
+                    </div>
+                    <button type="button" id="btnHeadingCompass" 
+                            class="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 font-semibold text-xs px-3.5 py-2 rounded-xl border border-slate-200 flex items-center space-x-1.5 transition">
+                        <i class="fa-solid fa-regular fa-compass text-sky-600"></i>
+                        <span>Compass</span>
+                    </button>
+                </div>
+                <p id="takeoffHeadingError" class="text-rose-500 text-xs mt-1 hidden"></p>
+            </div>
+
+        </div>
+
+        <!-- CLEAN COMPASS OVERLAY MODAL -->
+        <div id="compassModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-2xl w-full max-w-xs p-5 text-center shadow-xl border border-slate-100 space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                    <h3 id="compassModalTitle" class="text-xs font-bold text-slate-700 uppercase tracking-wider">Capture Direction</h3>
+                    <button id="btnCloseCompass" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-base"></i></button>
+                </div>
+
+                <!-- Compass Graphic -->
+                <div class="relative w-44 h-44 mx-auto my-2 flex items-center justify-center">
+                    <div id="compassDial" class="w-full h-full rounded-full border-2 border-slate-200 bg-slate-50 flex items-center justify-center relative transition-transform duration-200">
+                        <span class="absolute top-2 font-bold text-xs text-rose-500">N</span>
+                        <span class="absolute right-2 font-bold text-xs text-slate-400">E</span>
+                        <span class="absolute bottom-2 font-bold text-xs text-slate-400">S</span>
+                        <span class="absolute left-2 font-bold text-xs text-slate-400">W</span>
+                        <div class="w-full h-[1px] bg-slate-200 absolute"></div>
+                        <div class="h-full w-[1px] bg-slate-200 absolute"></div>
+                    </div>
+                    <div class="absolute w-3 h-3 bg-sky-600 rounded-full border-2 border-white shadow-md"></div>
+                </div>
+
+                <div>
+                    <span id="liveHeadingVal" class="text-3xl font-bold text-slate-900">0</span>
+                    <span class="text-sm font-semibold text-slate-400">°</span>
+                </div>
+
+                <p id="compassStatus" class="text-xs text-slate-500">Point phone in direction and tap set.</p>
+
+                <button id="btnConfirmCompass" class="w-full bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white font-semibold text-sm py-2.5 rounded-xl transition">
+                    Set Heading
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="max-w-md mx-auto w-full px-4 pt-4 text-center">
+        <p class="text-xs font-semibold text-slate-500">
+            Suitable for Apco Cruiser S 550
+        </p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // BASE CONSTANTS (Ref: 490 kg @ 20°C MSL = 70.1 km/h)
+        const BASE_WEIGHT_REF = 490; // kg
+        const BASE_IAS_REF = 70.1;   // km/h at 490kg
+        const LIFT_COEFFICIENT = BASE_IAS_REF / Math.sqrt(BASE_WEIGHT_REF); // ~3.16705
+
+        // SEA LEVEL STANDARD DENSITY AT 20°C REFERENCE POINT
+        // Air Density rho0 (20°C, 1013.25 hPa) = 1.2041 kg/m³
+        const RHO_REF_20C = 1.2041; 
+
+        // SPEED UNITS CONVERSION
+        const UNITS = {
+            kmh: { name: 'km/h', factor: 1.0, maxWind: 50 },
+            ms:  { name: 'm/s',  factor: 0.277778, maxWind: 13.9 },
+            kt:  { name: 'kt',   factor: 0.539957, maxWind: 27.0 }
+        };
+
+        let currentUnit = 'kmh'; // default speed unit
+        let currentTempUnit = 'c'; // default temperature unit ('c' or 'f')
+        let activeCompassTarget = null;
+        let currentLiveHeading = 0;
+
+        // DOM ELEMENTS
+        const weightInput = document.getElementById('weightInput');
+        const tempInput = document.getElementById('tempInput');
+        const altitudeInput = document.getElementById('altitudeInput');
+        const windSpeedInput = document.getElementById('windSpeedInput');
+        const windDirInput = document.getElementById('windDirInput');
+        const takeoffHeadingInput = document.getElementById('takeoffHeadingInput');
+        const windSpeedLimitLabel = document.getElementById('windSpeedLimitLabel');
+
+        // DISPLAY ELEMENTS
+        const resAirspeed = document.getElementById('resAirspeed');
+        const resIas = document.getElementById('resIas');
+        const resGroundSpeed = document.getElementById('resGroundSpeed');
+        const resDensityAlt = document.getElementById('resDensityAlt');
+        const resHeadwind = document.getElementById('resHeadwind');
+        const resCrosswind = document.getElementById('resCrosswind');
+        const speedStatusBadge = document.getElementById('speedStatusBadge');
+        const warningsContainer = document.getElementById('warningsContainer');
+
+        // ERRORS
+        const weightError = document.getElementById('weightError');
+        const tempError = document.getElementById('tempError');
+        const altitudeError = document.getElementById('altitudeError');
+        const windSpeedError = document.getElementById('windSpeedError');
+        const windDirError = document.getElementById('windDirError');
+        const takeoffHeadingError = document.getElementById('takeoffHeadingError');
+
+        // BUTTONS & MODALS
+        const btnGetAltitude = document.getElementById('btnGetAltitude');
+        const btnWindCompass = document.getElementById('btnWindCompass');
+        const btnHeadingCompass = document.getElementById('btnHeadingCompass');
+        const compassModal = document.getElementById('compassModal');
+        const compassModalTitle = document.getElementById('compassModalTitle');
+        const compassDial = document.getElementById('compassDial');
+        const liveHeadingVal = document.getElementById('liveHeadingVal');
+        const compassStatus = document.getElementById('compassStatus');
+        const btnCloseCompass = document.getElementById('btnCloseCompass');
+        const btnConfirmCompass = document.getElementById('btnConfirmCompass');
+
+        // SPEED UNIT SELECTOR EVENT LISTENERS
+        document.querySelectorAll('#unitSelector .unit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const newUnit = e.currentTarget.getAttribute('data-unit');
+                if (newUnit === currentUnit) return;
+
+                // Convert existing wind input value to new unit
+                const currentWindInKmh = (parseFloat(windSpeedInput.value) || 0) / UNITS[currentUnit].factor;
+                currentUnit = newUnit;
+                windSpeedInput.value = (currentWindInKmh * UNITS[currentUnit].factor).toFixed(1);
+
+                // Update UI button styles
+                document.querySelectorAll('#unitSelector .unit-btn').forEach(b => {
+                    b.className = 'unit-btn text-xs font-semibold px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900';
+                });
+                e.currentTarget.className = 'unit-btn text-xs font-semibold px-3 py-1.5 rounded-lg transition bg-white text-sky-700 shadow-sm';
+
+                // Update unit labels & max wind hints
+                document.querySelectorAll('.unit-label').forEach(el => {
+                    el.textContent = UNITS[currentUnit].name;
+                });
+                windSpeedLimitLabel.textContent = `Max ${UNITS[currentUnit].maxWind.toFixed(1)} ${UNITS[currentUnit].name}`;
+
+                calculate();
+            });
+        });
+
+        // TEMPERATURE UNIT SWITCHER
+        document.querySelectorAll('#tempUnitSelector .temp-unit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const newTempUnit = e.currentTarget.getAttribute('data-tempunit');
+                if (newTempUnit === currentTempUnit) return;
+
+                let val = parseFloat(tempInput.value) || 0;
+                if (newTempUnit === 'f') {
+                    // C to F
+                    val = (val * 9 / 5) + 32;
+                } else {
+                    // F to C
+                    val = (val - 32) * 5 / 9;
+                }
+
+                currentTempUnit = newTempUnit;
+                tempInput.value = Math.round(val);
+
+                document.querySelectorAll('#tempUnitSelector .temp-unit-btn').forEach(b => {
+                    b.className = 'temp-unit-btn text-[10px] font-bold px-2 py-0.5 rounded transition text-slate-500 hover:text-slate-800';
+                });
+                e.currentTarget.className = 'temp-unit-btn text-[10px] font-bold px-2 py-0.5 rounded transition bg-white text-sky-700 shadow-xs';
+
+                document.querySelectorAll('.temp-unit-label').forEach(el => {
+                    el.textContent = currentTempUnit === 'c' ? '°C' : '°F';
+                });
+
+                calculate();
+            });
+        });
+
+        /**
+         * Main Flight Calculation & Warning Handler
+         */
+        function calculate() {
+            let isValid = true;
+
+            // 1. Weight Validation
+            const weight = parseFloat(weightInput.value);
+            if (isNaN(weight) || weight <= 0) {
+                showError(weightError, "Please enter a valid weight (e.g. 490 kg)");
+                isValid = false;
+            } else {
+                hideError(weightError);
+            }
+
+            // 2. Temperature Validation & Normalized Celsius Conversion
+            let tempRaw = parseFloat(tempInput.value);
+            let tempC = tempRaw;
+            if (isNaN(tempRaw)) {
+                showError(tempError, "Please enter ambient temperature");
+                isValid = false;
+            } else {
+                if (currentTempUnit === 'f') {
+                    tempC = (tempRaw - 32) * 5 / 9;
+                }
+                if (tempC < -30 || tempC > 60) {
+                    showError(tempError, "Temperature out of realistic range");
+                    isValid = false;
+                } else {
+                    hideError(tempError);
+                }
+            }
+
+            // 3. Airfield Elevation Validation
+            const altitudeMeters = parseFloat(altitudeInput.value) || 0;
+            if (altitudeMeters < -100 || altitudeMeters > 5000) {
+                showError(altitudeError, "Elevation must be between 0 and 5000 meters");
+                isValid = false;
+            } else {
+                hideError(altitudeError);
+            }
+
+            // 4. Wind Speed Input
+            const inputWindSpeed = parseFloat(windSpeedInput.value) || 0;
+            const windSpeedKmh = inputWindSpeed / UNITS[currentUnit].factor;
+
+            if (inputWindSpeed < 0) {
+                showError(windSpeedError, "Wind speed cannot be negative");
+                isValid = false;
+            } else if (windSpeedKmh > 50) {
+                showError(windSpeedError, `Warning: Wind exceeds ${UNITS[currentUnit].maxWind.toFixed(1)} ${UNITS[currentUnit].name} limit`);
+                isValid = true;
+            } else {
+                hideError(windSpeedError);
+            }
+
+            // 5. Wind Direction Validation
+            const windDir = parseInt(windDirInput.value, 10) || 0;
+            if (windDir < 0 || windDir > 360) {
+                showError(windDirError, "Direction must be between 0° and 360°");
+                isValid = false;
+            } else {
+                hideError(windDirError);
+            }
+
+            // 6. Takeoff Heading Validation
+            const takeoffHeading = parseInt(takeoffHeadingInput.value, 10) || 0;
+            if (takeoffHeading < 0 || takeoffHeading > 360) {
+                showError(takeoffHeadingError, "Heading must be between 0° and 360°");
+                isValid = false;
+            } else {
+                hideError(takeoffHeadingError);
+            }
+
+            if (!isValid) return;
+
+            // --- INDICATED AIRSPEED (IAS) BASED ON WEIGHT ---
+            // Base IAS at 20°C MSL reference
+            const iasKmh = LIFT_COEFFICIENT * Math.sqrt(weight);
+
+            // --- ATMOSPHERIC & DENSITY ALTITUDE COMPUTATION ---
+            // Standard ISA Temperature at Elevation: T_isa = 15°C - 0.0065 * altitude(m)
+            const isaTempC = 15.0 - (0.0065 * altitudeMeters);
+            
+            // ISA Pressure Ratio: P / P0 = (1 - 2.25577e-5 * h)^5.25588
+            const pressureRatio = Math.pow(1 - (2.25577e-5 * altitudeMeters), 5.25588);
+            
+            // Actual Absolute Temperature in Kelvin: T_kelvin = tempC + 273.15
+            const tempKelvin = tempC + 273.15;
+            const refTempKelvin = 20.0 + 273.15; // 293.15 K
+            
+            // Actual Air Density ratio relative to 20°C Sea Level Reference:
+            // rho = P / (R * T) => rho / rho_ref = pressureRatio * (293.15 / tempKelvin)
+            const densityRatio = pressureRatio * (refTempKelvin / tempKelvin);
+            
+            // Density Altitude Estimation (Meters): DA = Altitude + (120 * (tempC - isaTempC))
+            const isaTempAtAlt = 15 - (0.0065 * altitudeMeters);
+            const isaDev = tempC - isaTempAtAlt;
+            const densityAltitudeMeters = Math.max(0, Math.round(altitudeMeters + (120 * isaDev)));
+
+            // --- TRUE AIRSPEED (TAS) DYNAMICS ---
+            // L = 1/2 * rho * V_tas^2 * S * Cl  =>  V_tas = V_ias / sqrt(densityRatio)
+            const trueAirspeedKmh = iasKmh / Math.sqrt(densityRatio);
+
+            // --- WIND VECTOR CALCULATIONS ---
+            const angleRad = (windDir - takeoffHeading) * (Math.PI / 180);
+            const headwindKmh = windSpeedKmh * Math.cos(angleRad);
+            const crosswindKmh = Math.abs(windSpeedKmh * Math.sin(angleRad));
+            const groundSpeedKmh = Math.max(0, trueAirspeedKmh - headwindKmh);
+
+            // Conversions for active unit
+            const factor = UNITS[currentUnit].factor;
+            const unitName = UNITS[currentUnit].name;
+
+            // Display Speed Results
+            resAirspeed.textContent = (trueAirspeedKmh * factor).toFixed(1);
+            resIas.textContent = (iasKmh * factor).toFixed(1);
+            resGroundSpeed.textContent = (groundSpeedKmh * factor).toFixed(1);
+            resDensityAlt.textContent = densityAltitudeMeters;
+
+            if (headwindKmh >= 0) {
+                resHeadwind.textContent = `${(headwindKmh * factor).toFixed(1)} ${unitName}`;
+            } else {
+                resHeadwind.textContent = `${(Math.abs(headwindKmh) * factor).toFixed(1)} ${unitName} (Tail)`;
+            }
+
+            resCrosswind.textContent = `${(crosswindKmh * factor).toFixed(1)} ${unitName}`;
+
+            // --- WARNING SYSTEM CHECK ---
+            let warningsHtml = '';
+            let hasTailwind = headwindKmh < -0.5;
+            
+            // Crosswind threshold: 5 knots = 9.26 km/h
+            const crosswindKnots = crosswindKmh * UNITS.kt.factor;
+            let severeCrosswind = crosswindKnots > 5.0;
+            let moderateCrosswind = crosswindKnots > 2.0 && !severeCrosswind;
+
+            // 1. TAILWIND WARNING ALERT
+            if (hasTailwind) {
+                const tailval = (Math.abs(headwindKmh) * factor).toFixed(1);
+                warningsHtml += `
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start space-x-2.5">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm mt-0.5"></i>
+                        <div class="text-xs">
+                            <span class="font-bold text-amber-800">Tailwind Warning (${tailval} ${unitName})</span>
+                            <p class="text-amber-700/90 mt-0.5">Taking off with a tailwind significantly increases ground speed & runway roll required.</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 2. CROSSWIND WARNING ALERTS
+            if (severeCrosswind) {
+                const crossval = (crosswindKmh * factor).toFixed(1);
+                const crossKtVal = crosswindKnots.toFixed(1);
+                warningsHtml += `
+                    <div class="bg-rose-50 border border-rose-200 rounded-xl p-3 flex items-start space-x-2.5">
+                        <i class="fa-solid fa-radiation text-rose-600 text-sm mt-0.5 animate-pulse"></i>
+                        <div class="text-xs">
+                            <span class="font-bold text-rose-800">Severe Crosswind Alert (${crossval} ${unitName} / ${crossKtVal} kt)</span>
+                            <p class="text-rose-700/90 mt-0.5">Crosswind component exceeds 5 knots limit! Exercise high caution.</p>
+                        </div>
+                    </div>
+                `;
+            } else if (moderateCrosswind) {
+                const crossval = (crosswindKmh * factor).toFixed(1);
+                warningsHtml += `
+                    <div class="bg-sky-50 border border-sky-200 rounded-xl p-3 flex items-start space-x-2.5">
+                        <i class="fa-solid fa-wind text-sky-600 text-sm mt-0.5"></i>
+                        <div class="text-xs">
+                            <span class="font-bold text-sky-800">Crosswind Caution (${crossval} ${unitName})</span>
+                            <p class="text-sky-700/90 mt-0.5">Active crosswind component present. Keep wing level during takeoff run.</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Render warnings or hide container
+            if (warningsHtml !== '') {
+                warningsContainer.innerHTML = warningsHtml;
+                warningsContainer.classList.remove('hidden');
+            } else {
+                warningsContainer.innerHTML = '';
+                warningsContainer.classList.add('hidden');
+            }
+
+            // Status Badge UI
+            if (severeCrosswind) {
+                speedStatusBadge.textContent = "High Crosswind";
+                speedStatusBadge.className = "text-[11px] font-medium text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100";
+            } else if (hasTailwind) {
+                speedStatusBadge.textContent = "Tailwind Penalty";
+                speedStatusBadge.className = "text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100";
+            } else {
+                speedStatusBadge.textContent = "Optimal Conditions";
+                speedStatusBadge.className = "text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100";
+            }
+        }
+
+        // Error Helpers
+        function showError(element, msg) {
+            element.textContent = msg;
+            element.classList.remove('hidden');
+        }
+
+        function hideError(element) {
+            element.textContent = '';
+            element.classList.add('hidden');
+        }
+
+        // Form Change Listeners
+        [weightInput, tempInput, altitudeInput, windSpeedInput, windDirInput, takeoffHeadingInput].forEach(el => {
+            el.addEventListener('input', calculate);
+        });
+
+        /**
+         * GPS Altitude Fetcher
+         */
+        btnGetAltitude.addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported on this device.");
+                return;
+            }
+
+            btnGetAltitude.innerHTML = `<i class="fa-solid fa-spinner animate-spin text-sky-600"></i> <span>GPS</span>`;
+
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    btnGetAltitude.innerHTML = `<i class="fa-solid fa-location-crosshairs text-sky-600"></i> <span>GPS</span>`;
+                    if (pos.coords.altitude !== null && !isNaN(pos.coords.altitude)) {
+                        altitudeInput.value = Math.max(0, Math.round(pos.coords.altitude));
+                        calculate();
+                    } else {
+                        alert("GPS signal acquired, but altitude data was unavailable.");
+                    }
+                },
+                (err) => {
+                    btnGetAltitude.innerHTML = `<i class="fa-solid fa-location-crosshairs text-sky-600"></i> <span>GPS</span>`;
+                    alert("Unable to fetch location altitude: " + err.message);
+                },
+                { enableHighAccuracy: true, timeout: 8000 }
+            );
+        });
+
+        /**
+         * Compass Integration
+         */
+        function openCompassModal(target) {
+            activeCompassTarget = target;
+            compassModalTitle.textContent = target === 'wind' ? 'Set Wind Direction' : 'Set Takeoff Heading';
+            compassModal.classList.remove('hidden');
+
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(state => {
+                        if (state === 'granted') {
+                            window.addEventListener('deviceorientation', handleOrientation, true);
+                        } else {
+                            compassStatus.textContent = "Orientation permission denied.";
+                        }
+                    })
+                    .catch(console.error);
+            } else if ('ondeviceorientationabsolute' in window) {
+                window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+            } else if ('ondeviceorientation' in window) {
+                window.addEventListener('deviceorientation', handleOrientation, true);
+            } else {
+                compassStatus.textContent = "Compass sensor not supported on this device.";
+            }
+        }
+
+        function handleOrientation(event) {
+            let heading = 0;
+            if (event.webkitCompassHeading) {
+                heading = event.webkitCompassHeading;
+            } else if (event.alpha !== null) {
+                heading = 360 - event.alpha;
+            }
+
+            heading = Math.round(heading) % 360;
+            if (heading < 0) heading += 360;
+
+            currentLiveHeading = heading;
+            liveHeadingVal.textContent = heading;
+            compassDial.style.transform = `rotate(-${heading}deg)`;
+        }
+
+        function closeCompassModal() {
+            compassModal.classList.add('hidden');
+            window.removeEventListener('deviceorientation', handleOrientation, true);
+            if ('ondeviceorientationabsolute' in window) {
+                window.removeEventListener('deviceorientationabsolute', handleOrientation, true);
+            }
+        }
+
+        btnWindCompass.addEventListener('click', () => openCompassModal('wind'));
+        btnHeadingCompass.addEventListener('click', () => openCompassModal('takeoff'));
+        btnCloseCompass.addEventListener('click', closeCompassModal);
+
+        btnConfirmCompass.addEventListener('click', () => {
+            if (activeCompassTarget === 'wind') {
+                windDirInput.value = currentLiveHeading;
+            } else if (activeCompassTarget === 'takeoff') {
+                takeoffHeadingInput.value = currentLiveHeading;
+            }
+            closeCompassModal();
+            calculate();
+        });
+
+        // Initialize on page load
+        window.onload = function() {
+            calculate();
+        };
+    </script>
+</body>
+</html>
