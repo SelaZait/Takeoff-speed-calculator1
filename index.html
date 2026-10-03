@@ -48,7 +48,7 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between font-sans antialiased text-slate-900 pb-6">
 
-    <!-- Minimal Header -->
+    <!-- Header -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
         <div class="max-w-md mx-auto px-4 py-3.5 flex justify-between items-center">
             <div class="flex items-center space-x-2.5">
@@ -87,9 +87,7 @@
         </div>
 
         <!-- WARNING ALERTS CONTAINER -->
-        <div id="warningsContainer" class="space-y-2 hidden">
-            <!-- Dynamic Tailwind/Crosswind alerts will be injected here -->
-        </div>
+        <div id="warningsContainer" class="space-y-2 hidden"></div>
 
         <!-- PRIMARY RESULT DISPLAY CARD -->
         <div class="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm space-y-3.5">
@@ -148,7 +146,7 @@
                     <span class="text-[11px] text-slate-400">490 kg @ 20°C MSL → 70.1 km/h</span>
                 </div>
                 <div class="relative">
-                    <input type="number" id="weightInput" value="490" min="200" max="1000" step="1"
+                    <input type="number" id="weightInput" value="490" min="200" max="1000" step="1" inputmode="decimal"
                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-base font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
                            placeholder="490">
                     <div class="absolute right-3.5 top-2.5 text-xs font-semibold text-slate-400">kg</div>
@@ -168,7 +166,7 @@
                     </div>
                 </div>
                 <div class="relative">
-                    <input type="number" id="tempInput" value="20" min="-30" max="60" step="1"
+                    <input type="number" id="tempInput" value="20" min="-30" max="60" step="1" inputmode="decimal"
                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-base font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
                            placeholder="20">
                     <div class="temp-unit-label absolute right-3.5 top-2.5 text-xs font-semibold text-slate-400">°C</div>
@@ -189,7 +187,7 @@
                 </div>
                 <div class="flex space-x-2">
                     <div class="relative flex-1">
-                        <input type="number" id="altitudeInput" value="0" min="-100" max="5000" step="10"
+                        <input type="number" id="altitudeInput" value="0" min="-100" max="5000" step="10" inputmode="decimal"
                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-base font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
                                placeholder="0">
                         <div class="alt-unit-label absolute right-3.5 top-2.5 text-xs font-semibold text-slate-400">m</div>
@@ -201,9 +199,10 @@
                     </button>
                 </div>
                 <p id="altitudeError" class="text-rose-500 text-xs mt-1 hidden"></p>
+                <p id="altitudeNote" class="text-[11px] text-slate-400 mt-1 hidden"></p>
             </div>
 
-            <!-- 3b. QNH INPUT -->
+            <!-- QNH INPUT -->
             <div class="space-y-1">
                 <div class="flex justify-between items-center">
                     <label for="qnhInput" class="text-xs font-semibold text-slate-700 flex items-center">
@@ -226,10 +225,10 @@
                     <label for="windSpeedInput" class="text-xs font-semibold text-slate-700 flex items-center">
                         <i class="fa-solid fa-wind text-sky-600 mr-1.5"></i> Wind Speed
                     </label>
-                    <span class="text-[11px] text-slate-400" id="windSpeedLimitLabel">Max 50 km/h</span>
+                    <span class="text-[11px] text-slate-400" id="windSpeedLimitLabel">Max 50.0 km/h</span>
                 </div>
                 <div class="relative">
-                    <input type="number" id="windSpeedInput" value="0" min="0" max="50" step="0.1"
+                    <input type="number" id="windSpeedInput" value="0" min="0" max="50" step="0.1" inputmode="decimal"
                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-base font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
                            placeholder="0">
                     <div class="unit-label absolute right-3.5 top-2.5 text-xs font-semibold text-slate-400">km/h</div>
@@ -237,17 +236,17 @@
                 <p id="windSpeedError" class="text-rose-500 text-xs mt-1 hidden"></p>
             </div>
 
-            <!-- 5. WIND DIRECTION INPUT WITH COMPASS -->
+            <!-- 5. WIND DIRECTION INPUT -->
             <div class="space-y-1">
                 <div class="flex justify-between items-center">
                     <label for="windDirInput" class="text-xs font-semibold text-slate-700 flex items-center">
-                        <i class="fa-solid fa-compass text-sky-600 mr-1.5"></i> Wind Direction
+                        <i class="fa-solid fa-compass text-sky-600 mr-1.5"></i> Wind Direction (from)
                     </label>
-                    <span class="text-[11px] text-slate-400">0° - 360°</span>
+                    <span class="text-[11px] text-slate-400">Blowing FROM · 0°–360°</span>
                 </div>
                 <div class="flex space-x-2">
                     <div class="relative flex-1">
-                        <input type="number" id="windDirInput" value="0" min="0" max="360" step="1"
+                        <input type="number" id="windDirInput" value="0" min="0" max="360" step="1" inputmode="numeric"
                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-base font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
                                placeholder="0">
                         <div class="absolute right-3.5 top-2.5 text-xs font-semibold text-slate-400">deg</div>
@@ -261,7 +260,7 @@
                 <p id="windDirError" class="text-rose-500 text-xs mt-1 hidden"></p>
             </div>
 
-            <!-- 6. TAKEOFF HEADING INPUT WITH COMPASS -->
+            <!-- 6. TAKEOFF HEADING INPUT -->
             <div class="space-y-1">
                 <div class="flex justify-between items-center">
                     <label for="takeoffHeadingInput" class="text-xs font-semibold text-slate-700 flex items-center">
@@ -271,7 +270,7 @@
                 </div>
                 <div class="flex space-x-2">
                     <div class="relative flex-1">
-                        <input type="number" id="takeoffHeadingInput" value="0" min="0" max="360" step="1"
+                        <input type="number" id="takeoffHeadingInput" value="0" min="0" max="360" step="1" inputmode="numeric"
                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-base font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
                                placeholder="0">
                         <div class="absolute right-3.5 top-2.5 text-xs font-semibold text-slate-400">deg</div>
@@ -287,12 +286,12 @@
 
         </div>
 
-        <!-- CLEAN COMPASS OVERLAY MODAL -->
+        <!-- COMPASS OVERLAY MODAL -->
         <div id="compassModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
             <div class="bg-white rounded-2xl w-full max-w-xs p-5 text-center shadow-xl border border-slate-100 space-y-4">
                 <div class="flex justify-between items-center border-b border-slate-100 pb-2">
                     <h3 id="compassModalTitle" class="text-xs font-bold text-slate-700 uppercase tracking-wider">Capture Direction</h3>
-                    <button id="btnCloseCompass" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-base"></i></button>
+                    <button id="btnCloseCompass" aria-label="Close" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-base"></i></button>
                 </div>
 
                 <!-- Compass Graphic -->
@@ -332,33 +331,37 @@
     <!-- FOOTER -->
     <footer class="max-w-md mx-auto w-full px-4 pt-4 text-center">
         <p class="text-xs font-semibold text-slate-500">
-            Designed for Apco Cruiser S 550
+            Suitable for Apco Cruiser S 550
         </p>
     </footer>
 
     <script>
         // BASE CONSTANTS (Ref: 490 kg @ 20°C MSL = 70.1 km/h)
-        const BASE_WEIGHT_REF = 490; // kg
-        const BASE_IAS_REF = 70.1;   // km/h at 490kg
-        const LIFT_COEFFICIENT = BASE_IAS_REF / Math.sqrt(BASE_WEIGHT_REF); // ~3.16705
+        const BASE_WEIGHT_REF = 490;
+        const BASE_IAS_REF = 70.1;
+        const LIFT_COEFFICIENT = BASE_IAS_REF / Math.sqrt(BASE_WEIGHT_REF);
 
         // SPEED UNITS CONVERSION
         const UNITS = {
-            kmh: { name: 'km/h', factor: 1.0, maxWind: 50 },
+            kmh: { name: 'km/h', factor: 1.0, maxWind: 50.0 },
             ms:  { name: 'm/s',  factor: 0.277778, maxWind: 13.9 },
             kt:  { name: 'kt',   factor: 0.539957, maxWind: 27.0 }
         };
 
-        let currentUnit = 'kmh'; // default speed unit
-        let currentTempUnit = 'c'; // default temperature unit ('c' or 'f')
-        let currentAltUnit = 'm';  // default altitude unit ('m' or 'ft')
+        let currentUnit = 'kmh';
+        let currentTempUnit = 'c';
+        let currentAltUnit = 'm';
         let activeCompassTarget = null;
-        let currentLiveHeading = 0;
+        let currentLiveHeading = null; // null = no valid compass reading yet
+        let compassReadyMsg = "";
+        let gpsBusy = false;
+        let iosCompassGranted = false;
 
         // DOM ELEMENTS
         const weightInput = document.getElementById('weightInput');
         const tempInput = document.getElementById('tempInput');
         const altitudeInput = document.getElementById('altitudeInput');
+        const qnhInput = document.getElementById('qnhInput');
         const windSpeedInput = document.getElementById('windSpeedInput');
         const windDirInput = document.getElementById('windDirInput');
         const takeoffHeadingInput = document.getElementById('takeoffHeadingInput');
@@ -378,6 +381,8 @@
         const weightError = document.getElementById('weightError');
         const tempError = document.getElementById('tempError');
         const altitudeError = document.getElementById('altitudeError');
+        const qnhError = document.getElementById('qnhError');
+        const altitudeNote = document.getElementById('altitudeNote');
         const windSpeedError = document.getElementById('windSpeedError');
         const windDirError = document.getElementById('windDirError');
         const takeoffHeadingError = document.getElementById('takeoffHeadingError');
@@ -396,14 +401,9 @@
         const iosPermissionPrompt = document.getElementById('iosPermissionPrompt');
         const btnRequestIosPermission = document.getElementById('btnRequestIosPermission');
 
-        const qnhInput = document.getElementById('qnhInput');
-        const qnhError = document.getElementById('qnhError');
-
-        // CANONICAL STATE - always metric (km/h, °C, m, hPa).
-        // Unit switches only re-render the inputs, so repeated switching never accumulates rounding error.
+        // CANONICAL STATE (km/h, °C, m, hPa)
         const canon = { windKmh: 0, tempC: 20, altM: 0, qnh: 1013.25 };
 
-        // Empty / non-numeric input -> NaN (never silently treated as 0)
         const toNum = (el) => {
             const str = el.value.trim();
             return str === '' ? NaN : Number(str);
@@ -507,7 +507,6 @@
             });
         });
 
-        // Blank the results so stale numbers are never shown next to invalid input
         function clearResults() {
             [resAirspeed, resIas, resGroundSpeed, resDensityAlt, resHeadwind, resCrosswind].forEach(el => {
                 el.textContent = '—';
@@ -533,7 +532,7 @@
                 hideError(weightError);
             }
 
-            // 2. Temperature (canonical °C)
+            // 2. Temperature
             const tempC = canon.tempC;
             if (isNaN(tempC)) {
                 showError(tempError, "Please enter ambient temperature");
@@ -545,7 +544,7 @@
                 hideError(tempError);
             }
 
-            // 3. Airfield elevation (canonical metres)
+            // 3. Airfield elevation
             const altMeters = canon.altM;
             if (isNaN(altMeters)) {
                 showError(altitudeError, "Please enter airfield elevation (0 for sea level)");
@@ -557,7 +556,7 @@
                 hideError(altitudeError);
             }
 
-            // 3b. QNH
+            // QNH
             if (isNaN(canon.qnh)) {
                 showError(qnhError, "Please enter QNH (1013.25 if unknown)");
                 isValid = false;
@@ -568,21 +567,22 @@
                 hideError(qnhError);
             }
 
-            // 4. Wind speed (canonical km/h)
+            // 4. Wind speed - FIX: Always compare canonical km/h against 50 km/h threshold
             const windSpeedKmh = canon.windKmh;
+            const maxWindKmh = 50.0;
             if (isNaN(windSpeedKmh)) {
                 showError(windSpeedError, "Please enter wind speed (0 if calm)");
                 isValid = false;
             } else if (windSpeedKmh < 0) {
                 showError(windSpeedError, "Wind speed cannot be negative");
                 isValid = false;
-            } else if (windSpeedKmh > 50.1) { // small tolerance so the displayed max (e.g. 13.9 m/s) doesn't trip the warning
+            } else if (windSpeedKmh > maxWindKmh + 0.1) {
                 showError(windSpeedError, `Warning: Wind exceeds ${UNITS[currentUnit].maxWind.toFixed(1)} ${UNITS[currentUnit].name} limit`);
             } else {
                 hideError(windSpeedError);
             }
 
-            // 5. Wind direction (wind blowing FROM) & takeoff heading
+            // 5. Wind direction & Takeoff heading
             const windDir = toNum(windDirInput);
             if (isNaN(windDir)) {
                 showError(windDirError, "Please enter wind direction (0°–360°)");
@@ -610,19 +610,18 @@
                 return;
             }
 
-            // Indicated Airspeed (IAS) - scaled from the 490 kg reference
+            // Indicated Airspeed (IAS)
             const iasKmh = LIFT_COEFFICIENT * Math.sqrt(weight);
 
-            // Atmosphere (one consistent ISA model for both TAS and Density Altitude)
-            // Station pressure from QNH + elevation, then density ratio vs ISA sea level.
-            const stationPressure = canon.qnh * Math.pow(1 - 2.25577e-5 * altMeters, 5.25588); // hPa
-            const sigma = (stationPressure / 1013.25) * (288.15 / (tempC + 273.15));            // ρ/ρ0
+            // Density Altitude Calculation
+            const stationPressure = canon.qnh * Math.pow(1 - 2.25577e-5 * altMeters, 5.25588);
+            const sigma = (stationPressure / 1013.25) * (288.15 / (tempC + 273.15));
             const densityAltitudeMeters = Math.round(44330.77 * (1 - Math.pow(sigma, 0.234969)));
 
             // True Airspeed (TAS)
             const trueAirspeedKmh = iasKmh / Math.sqrt(sigma);
 
-            // Wind Breakdown Calculations
+            // Wind Breakdown
             const angleRad = (windDir - takeoffHeading) * (Math.PI / 180);
             const headwindKmh = windSpeedKmh * Math.cos(angleRad);
             const crosswindKmh = Math.abs(windSpeedKmh * Math.sin(angleRad));
@@ -631,7 +630,7 @@
             const factor = UNITS[currentUnit].factor;
             const unitName = UNITS[currentUnit].name;
 
-            // Output Calculations
+            // Display Results
             resAirspeed.textContent = (trueAirspeedKmh * factor).toFixed(1);
             resIas.textContent = (iasKmh * factor).toFixed(1);
             resGroundSpeed.textContent = (groundSpeedKmh * factor).toFixed(1);
@@ -652,7 +651,6 @@
             let hasTailwind = headwindKmh < -0.5;
             const crosswindKnots = crosswindKmh * UNITS.kt.factor;
             let severeCrosswind = crosswindKnots > 5.0;
-            let moderateCrosswind = crosswindKnots > 2.0 && !severeCrosswind;
 
             if (hasTailwind) {
                 const tailval = (Math.abs(headwindKmh) * factor).toFixed(1);
@@ -676,17 +674,6 @@
                         <div class="text-xs">
                             <span class="font-bold text-rose-800">Severe Crosswind Alert (${crossval} ${unitName} / ${crossKtVal} kt)</span>
                             <p class="text-rose-700/90 mt-0.5">Crosswind component exceeds 5 knots limit! Proceed with caution.</p>
-                        </div>
-                    </div>
-                `;
-            } else if (moderateCrosswind) {
-                const crossval = (crosswindKmh * factor).toFixed(1);
-                warningsHtml += `
-                    <div class="bg-sky-50 border border-sky-200 rounded-xl p-3 flex items-start space-x-2.5">
-                        <i class="fa-solid fa-wind text-sky-600 text-sm mt-0.5"></i>
-                        <div class="text-xs">
-                            <span class="font-bold text-sky-800">Crosswind Caution (${crossval} ${unitName})</span>
-                            <p class="text-sky-700/90 mt-0.5">Moderate crosswind present. Keep wing level during roll.</p>
                         </div>
                     </div>
                 `;
@@ -726,61 +713,107 @@
         windDirInput.addEventListener('input', calculate);
         takeoffHeadingInput.addEventListener('input', calculate);
         tempInput.addEventListener('input', () => { syncTemp(); calculate(); });
-        altitudeInput.addEventListener('input', () => { syncAlt(); calculate(); });
+        altitudeInput.addEventListener('input', () => { syncAlt(); altitudeNote.classList.add('hidden'); calculate(); });
         qnhInput.addEventListener('input', () => { syncQnh(); calculate(); });
         windSpeedInput.addEventListener('input', () => { syncWind(); calculate(); });
 
+        // ---------- GPS ----------
         btnGetAltitude.addEventListener('click', () => {
+            if (gpsBusy) return;
             if (!navigator.geolocation) {
                 alert("Geolocation is not supported on this device/browser.");
                 return;
             }
 
-            if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-                alert("Note for iOS Safari: GPS altitude access requires a secure HTTPS connection.");
-            }
-
+            const idleHtml = `<i class="fa-solid fa-location-crosshairs text-sky-600"></i> <span>GPS</span>`;
+            gpsBusy = true;
+            btnGetAltitude.disabled = true;
+            btnGetAltitude.classList.add('opacity-60');
             btnGetAltitude.innerHTML = `<i class="fa-solid fa-spinner animate-spin text-sky-600"></i> <span>GPS</span>`;
+            const done = () => {
+                gpsBusy = false;
+                btnGetAltitude.disabled = false;
+                btnGetAltitude.classList.remove('opacity-60');
+                btnGetAltitude.innerHTML = idleHtml;
+            };
 
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
-                    btnGetAltitude.innerHTML = `<i class="fa-solid fa-location-crosshairs text-sky-600"></i> <span>GPS</span>`;
-                    if (pos.coords.altitude !== null && !isNaN(pos.coords.altitude)) {
-                        canon.altM = Math.max(0, pos.coords.altitude);
+                    done();
+                    const alt = pos.coords.altitude;
+                    if (alt !== null && !isNaN(alt)) {
+                        // No clamp at 0: fields below sea level are valid, and out-of-range values are flagged by validation
+                        canon.altM = alt;
                         renderAltInput();
+                        const acc = pos.coords.altitudeAccuracy;
+                        altitudeNote.textContent = `GPS altitude${acc != null ? ' (±' + Math.round(acc) + ' m)' : ''} can differ from the official airfield elevation. Verify before use.`;
+                        altitudeNote.classList.remove('hidden');
                         calculate();
                     } else {
                         alert("Location found, but elevation data is unavailable from device GPS.");
                     }
                 },
                 (err) => {
-                    btnGetAltitude.innerHTML = `<i class="fa-solid fa-location-crosshairs text-sky-600"></i> <span>GPS</span>`;
-                    if (err.code === err.PERMISSION_DENIED) {
-                        alert("Location access denied. Enable Location permissions for Safari in iPhone Settings > Privacy > Location Services.");
-                    } else {
-                        alert("GPS Error: " + err.message);
-                    }
+                    done();
+                    alert("GPS Error: " + err.message);
                 },
                 { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
         });
 
-        function handleOrientation(event) {
-            let heading = 0;
+        // ---------- COMPASS ----------
+        const COMPASS_MSG = {
+            wind: "Face INTO the wind (the direction it comes FROM), then tap Set.",
+            takeoff: "Point the phone along the takeoff direction, then tap Set."
+        };
 
-            // iOS Webkit Magnetic North Compass Heading
-            if (event.webkitCompassHeading !== undefined && event.webkitCompassHeading !== null) {
-                heading = event.webkitCompassHeading;
-            } else if (event.alpha !== null && event.alpha !== undefined) {
-                heading = 360 - event.alpha;
+        // Tilt-compensated compass heading (degrees clockwise from north) from alpha/beta/gamma.
+        // Uses the phone's top edge when held flat, and its back when held upright.
+        function headingFromEuler(alpha, beta, gamma) {
+            const d = Math.PI / 180;
+            const a = alpha * d, b = beta * d, g = gamma * d;
+            const cA = Math.cos(a), sA = Math.sin(a);
+            const cB = Math.cos(b), sB = Math.sin(b);
+            const cG = Math.cos(g), sG = Math.sin(g);
+            // earth frame: x = east, y = north
+            const topX = -sA * cB,                topY = cA * cB;
+            const backX = -(cA * sG + sA * sB * cG), backY = -(sA * sG - cA * sB * cG);
+            const useTop = Math.hypot(topX, topY) >= Math.hypot(backX, backY);
+            const x = useTop ? topX : backX;
+            const y = useTop ? topY : backY;
+            if (Math.hypot(x, y) < 1e-6) return null;
+            return (Math.atan2(x, y) / d + 360) % 360;
+        }
+
+        function handleOrientation(event) {
+            let heading = null;
+
+            if (typeof event.webkitCompassHeading === 'number') {
+                // iOS
+                if (event.webkitCompassHeading >= 0 && !(event.webkitCompassAccuracy < 0)) {
+                    heading = event.webkitCompassHeading;
+                } else {
+                    compassStatus.textContent = "Compass not calibrated. Move the phone in a figure-8.";
+                    return;
+                }
+            } else if (event.alpha != null && event.beta != null && event.gamma != null &&
+                       (event.absolute === true || event.type === 'deviceorientationabsolute')) {
+                heading = headingFromEuler(event.alpha, event.beta, event.gamma);
+            }
+
+            if (heading === null || isNaN(heading)) {
+                if (currentLiveHeading === null) {
+                    compassStatus.textContent = "No compass data from this device/browser.";
+                }
+                return;
             }
 
             heading = Math.round(heading) % 360;
-            if (heading < 0) heading += 360;
+            if (compassStatus.textContent !== compassReadyMsg) compassStatus.textContent = compassReadyMsg;
 
             currentLiveHeading = heading;
             liveHeadingVal.textContent = heading;
-            compassDial.style.transform = `rotate(-${heading}deg)`;
+            compassDial.style.transform = `rotate(${-heading}deg)`;
         }
 
         function startCompassListeners() {
@@ -795,16 +828,23 @@
 
         function openCompassModal(target) {
             activeCompassTarget = target;
-            compassModalTitle.textContent = target === 'wind' ? 'Set Wind Direction' : 'Set Takeoff Heading';
+            compassReadyMsg = COMPASS_MSG[target];
+            // Never reuse a reading from a previous session
+            currentLiveHeading = null;
+            liveHeadingVal.textContent = '--';
+            compassDial.style.transform = 'rotate(0deg)';
+            compassModalTitle.textContent = target === 'wind' ? 'Set Wind Direction (FROM)' : 'Set Takeoff Heading';
             compassModal.classList.remove('hidden');
 
-            // Explicit permission request for iOS 13+
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            const isIosPermissionRequired = typeof DeviceOrientationEvent !== 'undefined' &&
+                                            typeof DeviceOrientationEvent.requestPermission === 'function';
+
+            if (isIosPermissionRequired && !iosCompassGranted) {
                 iosPermissionPrompt.classList.remove('hidden');
                 compassStatus.textContent = "iOS requires permission to access device compass.";
             } else {
                 iosPermissionPrompt.classList.add('hidden');
-                compassStatus.textContent = "Point phone in direction and tap set.";
+                compassStatus.textContent = compassReadyMsg;
                 startCompassListeners();
             }
         }
@@ -814,8 +854,9 @@
                 DeviceOrientationEvent.requestPermission()
                     .then(state => {
                         if (state === 'granted') {
+                            iosCompassGranted = true;
                             iosPermissionPrompt.classList.add('hidden');
-                            compassStatus.textContent = "Compass connected. Point phone in direction.";
+                            compassStatus.textContent = compassReadyMsg;
                             startCompassListeners();
                         } else {
                             compassStatus.textContent = "Compass permission denied on iOS.";
@@ -831,16 +872,26 @@
         function closeCompassModal() {
             compassModal.classList.add('hidden');
             window.removeEventListener('deviceorientation', handleOrientation, true);
-            if ('ondeviceorientationabsolute' in window) {
-                window.removeEventListener('deviceorientationabsolute', handleOrientation, true);
-            }
+            window.removeEventListener('deviceorientationabsolute', handleOrientation, true);
         }
 
         btnWindCompass.addEventListener('click', () => openCompassModal('wind'));
         btnHeadingCompass.addEventListener('click', () => openCompassModal('takeoff'));
         btnCloseCompass.addEventListener('click', closeCompassModal);
 
+        // Close on backdrop tap or Escape
+        compassModal.addEventListener('click', (e) => {
+            if (e.target === compassModal) closeCompassModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !compassModal.classList.contains('hidden')) closeCompassModal();
+        });
+
         btnConfirmCompass.addEventListener('click', () => {
+            if (currentLiveHeading === null) {
+                compassStatus.textContent = "No compass reading yet. Move the phone and try again.";
+                return;
+            }
             if (activeCompassTarget === 'wind') {
                 windDirInput.value = currentLiveHeading;
             } else if (activeCompassTarget === 'takeoff') {
